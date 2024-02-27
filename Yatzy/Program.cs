@@ -1,12 +1,5 @@
-﻿using System;
-using System.Threading;
-using System.Runtime.Serialization.Formatters;
-using System.Security.Cryptography.X509Certificates;
-using System.Data;
-
-namespace Yatzy
+﻿namespace Yatzy
 {
-    #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
     internal class Program
     {
         static void ShowRolls(List<sbyte> rolls)
@@ -28,7 +21,7 @@ namespace Yatzy
             Console.WriteLine("Ønkser du at reroll nogle terninger?");
             Console.Write("Skriv ja/nej: ");
 
-            string answer = Console.ReadLine();
+            string answer = Console.ReadLine() ?? "";
 
             if (answer != "ja" && answer != "nej")
             {
@@ -43,21 +36,27 @@ namespace Yatzy
         {
             Console.Write("Hvor mange spillere? (1-3): ");
 
-            int value = int.Parse(Console.ReadLine());
-
-            for (int i = 0; i < value; i++)
+            if (int.TryParse(Console.ReadLine(), out int value) && value > 0 && value < 4)
             {
-                Console.Write("Indtast spiller " + (i+1) + " navn: ");
-                Scoreboard.AddPlayer(Console.ReadLine());
-            }
+                Console.Clear();
+                for (int i = 0; i < value; i++)
+                {
+                    Console.Write("Indtast spiller " + (i + 1) + " navn: ");
+                    Scoreboard.AddPlayer(Console.ReadLine() ?? "");
+                }
 
-            Console.WriteLine("Spillet starter om 3");
-            Thread.Sleep(1000);
-            Console.WriteLine("2");
-            Thread.Sleep(1000);
-            Console.WriteLine("1");
-            Thread.Sleep(1000);
-            Console.Clear();
+                Console.WriteLine("Spillet starter om 3");
+                Thread.Sleep(1000);
+                Console.WriteLine("2");
+                Thread.Sleep(1000);
+                Console.WriteLine("1");
+                Thread.Sleep(1000);
+                Console.Clear();
+            } else
+            {
+                Console.WriteLine("FEJL! Prøv igen");
+                ChooseStarterPlayers();
+            }
         }
 
         static void Main()
@@ -73,7 +72,7 @@ namespace Yatzy
                 Scoreboard.PrintScoreboard();
 
                 Console.WriteLine($"{currentPlayer} slår med terningerne");
-                Console.Write("Tryk enter for at slå med terningerne");
+                Console.WriteLine("Tryk enter for at slå med terningerne");
                 Console.ReadLine();
 
                 Console.Clear();

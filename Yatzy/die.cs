@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Yatzy
+﻿namespace Yatzy
 {
 
     public class Die
@@ -33,11 +27,15 @@ namespace Yatzy
             string[] stringArray = removeSpace.Split(",");
 
             // her laver vi et tomt array der ser sådan her ud []
-            int[] rolls = new int[stringArray.Length];
+            int[] rolls = [];
 
             for (int i = 0; i < stringArray.Length; i++)
             {
-                rolls[i] = int.Parse(stringArray[i]);
+
+                if (int.TryParse(stringArray[i], out int value) && value < 6 && value > 0)
+                {
+                    rolls[i] = value;
+                }
             }
 
             return rolls;
@@ -47,20 +45,22 @@ namespace Yatzy
         {
             Console.Write("Skriv terning tallene du gerne vil reroll f.eks. (1, 3, 5) ");
 
-            #pragma warning disable CS8604 // Possible null reference argument.
-            int[] rerollArray = GetRerollRoles(Console.ReadLine());
-            #pragma warning restore CS8604 // Possible null reference argument.
+            int[] rerollArray = GetRerollRoles(Console.ReadLine() ?? "");
 
             foreach (int i in rerollArray)
             {
                 int index = i - 1;
-                Console.WriteLine($"Reroller terning {i}");
-                dice[index] = GetRandomRolls(1)[0];
 
-                Thread.Sleep(500);
+                if (dice.Count >= index)
+                {
+                    Console.WriteLine($"Reroller terning {i}");
+                    dice[index] = GetRandomRolls(1)[0];
 
-                Console.WriteLine($"Du slog en {dice[index]}");
-                Thread.Sleep(500);
+                    Thread.Sleep(500);
+
+                    Console.WriteLine($"Du slog en {dice[index]}");
+                    Thread.Sleep(500);
+                }
             }
         }
     }

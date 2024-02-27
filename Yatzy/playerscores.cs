@@ -1,6 +1,4 @@
-﻿using static System.Formats.Asn1.AsnWriter;
-
-namespace Yatzy
+﻿namespace Yatzy
 {
     public class PlayerScores
     {

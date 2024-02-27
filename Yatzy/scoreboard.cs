@@ -1,8 +1,4 @@
-﻿using System;
-using System.Numerics;
-using static System.Formats.Asn1.AsnWriter;
-
-namespace Yatzy
+﻿namespace Yatzy
 {
     public static class Scoreboard
     {
@@ -161,18 +157,18 @@ namespace Yatzy
             return currentPlayer;
         }
 
-        public static sbyte GetZeroToFifteen()
+        public static sbyte GetZeroToSixteen()
         {
 
-            if (sbyte.TryParse(Console.ReadLine(), out sbyte i))
+            if (sbyte.TryParse(Console.ReadLine() ?? "", out sbyte i))
             {
-                if (i >= 0 && i <= 15)
+                if (i >= 0 && i <= 16)
                 {
                     return i;
                 }
             }
 
-            return GetZeroToFifteen();
+            return GetZeroToSixteen();
         }
 
 
@@ -218,7 +214,7 @@ namespace Yatzy
             {
                 Console.WriteLine($"Hvor vil du krydse af? (0 - {LoadOrder.Count - 1})");
 
-                sbyte value = GetZeroToFifteen();
+                sbyte value = GetZeroToSixteen();
 
                 rule = LoadOrder[value];
             }
