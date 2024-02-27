@@ -207,7 +207,6 @@ namespace Yatzy
             sbyte sum;
             do 
             {
-                Console.Clear();
                 Console.WriteLine($"Hvor vil du krydse af? (0 - {LoadOrder.Count - 1})");
 
                 sbyte value = GetZeroToFifteen();

@@ -68,9 +68,13 @@ namespace Yatzy
                     Console.Clear();
                 }
 
+                Console.Clear();
+
+                Console.Write("Dine terninger: ");
+
                 ShowRolls(cubeRolls);
 
-                Console.Clear();
+                Console.Write("\n");
 
                 Scoreboard.PrintPlayerScoreboard(currentPlayer, cubeRolls);
 
