@@ -7,7 +7,7 @@ namespace Yatzy
     public static class Scoreboard
     {
 
-        private static Dictionary<string, PlayerScores> Players = new Dictionary<string, PlayerScores>();
+        private static Dictionary<string, PlayerScores> Players = [];
 
         public static void AddPlayer(string playerName)
         {
@@ -30,24 +30,20 @@ namespace Yatzy
 
         public static string GetRandomStartPlayer()
         {
-            List<string> list = new List<string>();
+            List<string> list = [];
 
             foreach (KeyValuePair<string, PlayerScores> player in Players)
             {
                 list.Add(player.Key);
             }
 
-            Random random = new Random();
+            Random random = new();
 
             return list[random.Next(0, list.Count)];
         }
 
-        public static Dictionary<string, PlayerScores> GetAllPlayers()
-        {
-            return Players;
-        }
 
-        public static bool AddPlayerPoints(string playerName, List<sbyte> rolls, string rule, sbyte sumOfDice)
+        public static bool AddPlayerPoints(string playerName, List<sbyte> rolls, string rule)
         {
             PlayerScores player = Players[playerName];
 
@@ -60,12 +56,12 @@ namespace Yatzy
             if (Rules.simpleRules.ContainsKey(rule))
                 player.SetPlayerScore(rule, Rules.GetSumOfSimple(rolls, rule));
             else
-                player.SetPlayerScore(rule, Rules.GetSumOfAdvanced(rolls, sumOfDice, rule == "yatzy"));
+                player.SetPlayerScore(rule, Rules.GetSumOfAdvanced(rolls, GetRuleSum(rule), rule == "yatzy"));
 
             return true;
         }
 
-        private readonly static Dictionary<string, string> ValueToString = new Dictionary<string, string>()
+        private readonly static Dictionary<string, string> ValueToString = new()
         {
             {"seksere", "6'ere"},
             {"femere", "5'ere"},
@@ -74,6 +70,7 @@ namespace Yatzy
             {"toere", "2'ere"},
             {"enere", "1'ere"},
             {"bonus", "Bonus" },
+            {"extrabonus", "Extra Bonus" },
             {"paret", "Et Par" },
             {"parto", "To Par" },
             {"treens", "Tre Ens" },
@@ -85,20 +82,20 @@ namespace Yatzy
             {"yatzy", "YATZY!" }
         };
 
-        private readonly static List<string> LoadOrder = ["enere", "toere", "trere", "fiere", "femere", "seksere", "bonus", "paret", "parto", "treens", "fiereens", "lilstraight", "bigstraight", "house", "chance", "yatzy"];
+        private readonly static List<string> LoadOrder = ["enere", "toere", "trere", "fiere", "femere", "seksere", "bonus", "extrabonus", "paret", "parto", "treens", "fiereens", "lilstraight", "bigstraight", "house", "chance", "yatzy"];
         public static void PrintScoreboard()
         {
             int playerIndex = 0;
 
             foreach (KeyValuePair<string, PlayerScores> player in Players)
             {
-                // Her calculere vi distances mellem de forskellige spiller kort
+                // Here we calculate our x shift based on the playerIndex (1-3) that we are currently writing out
                 int xShift = playerIndex * 32;
 
-                // Her fortæller vi programmet hvilken linje vi skal skrive noget tekst ud på
+                // We tell program which y line to start on
                 sbyte yShift = 10;
 
-                // Her bruger vi vores variabler til at shifte positionen af tekst
+                // We use our y and x variables to shift our current writing position
                 Console.SetCursorPosition(xShift, yShift);
 
                 // her udskriver vi vores spillers navne
@@ -108,12 +105,12 @@ namespace Yatzy
                 yShift++;
                 Console.SetCursorPosition(xShift, yShift);
 
-                // Gem totalscoren på vores nuværende spiller
+                // Save our total score as an variable
                 int totalScore = 0;
 
 
                 /* 
-                 * Her udskriver vi basale informationer omkring den nuværendes spiller
+                 * Here we write out the points and rules of each player.
                  * [RULE] - Points
                  * Rule = The current rule showcasing for the player
                  * Points = How many points the player has yielded for that specific rule
@@ -121,7 +118,7 @@ namespace Yatzy
                 foreach (string order in LoadOrder)
                 {
                     string localeString = ValueToString[order];
-                    int score = player.Value.Scores[order] < 0 ? 0 : player.Value.Scores[order];
+                    int score = player.Value.GetPlayerScore(order) < 0 ? 0 : player.Value.GetPlayerScore(order);
 
                     // We need to use manual space padding as \t had issues with different lengths of strings
                     sbyte paddingRequired = (sbyte) Math.Max(0, 17 - localeString.Length);
@@ -152,12 +149,7 @@ namespace Yatzy
             int currentHighScore = 0;
             foreach (KeyValuePair<string, PlayerScores> player in Players)
             {
-                int score = 0;
-
-                foreach (KeyValuePair<string, int> playerScore in player.Value.Scores)
-                {
-                    score += playerScore.Value;
-                }
+                int score = player.Value.GetPlayerTotalScore();
 
                 if (score > currentHighScore)
                 {
@@ -171,14 +163,31 @@ namespace Yatzy
 
         public static sbyte GetZeroToFifteen()
         {
-            while (!sbyte.TryParse(Console.ReadLine(), out sbyte value) || value >= 0 && value <= 15)
+
+            if (sbyte.TryParse(Console.ReadLine(), out sbyte i))
             {
-                return value;
+                if (i >= 0 && i <= 15)
+                {
+                    return i;
+                }
             }
 
-            return 0;
+            return GetZeroToFifteen();
         }
 
+
+        public static sbyte GetRuleSum(string rule)
+        {
+            return rule switch
+            {
+                "paret" => 2,
+                "parto" => 4,
+                "treens" => 3,
+                "fiereens" => 4,
+                "yatzy" => 5,
+                _ => 0,
+            };
+        }
         public static void PrintPlayerScoreboard(string currentPlayer, List<sbyte> rolls)
         {
             PlayerScores player = Players[currentPlayer];
@@ -196,15 +205,15 @@ namespace Yatzy
                 Console.SetCursorPosition(0, yShift);
 
                 string LocaleString = ValueToString[order];
-                int score = player.Scores[order] < 0 ? 0 : player.Scores[order];
+
+                int score = player.GetPlayerScore(order) < 0 ? 0 : player.GetPlayerScore(order);
 
                 Console.Write($"{i, -10} {LocaleString, -20} {score, -10}");
             }
 
-            Console.SetCursorPosition(0, 0);
+            Console.SetCursorPosition(0, 1);
 
             string rule;
-            sbyte sum;
             do 
             {
                 Console.WriteLine($"Hvor vil du krydse af? (0 - {LoadOrder.Count - 1})");
@@ -212,30 +221,8 @@ namespace Yatzy
                 sbyte value = GetZeroToFifteen();
 
                 rule = LoadOrder[value];
-
-                switch (rule)
-                {
-                    case "paret":
-                        sum = 2;
-                        break;
-                    case "parto":
-                        sum = 4;
-                        break;
-                    case "treens":
-                        sum = 3;
-                        break;
-                    case "fiereens":
-                        sum = 4;
-                        break;
-                    case "yatzy":
-                        sum = 5;
-                        break;
-                    default:
-                        sum = 0;
-                        break;
-                };
             }
-            while (!AddPlayerPoints(currentPlayer, rolls, rule, sum));
+            while (!AddPlayerPoints(currentPlayer, rolls, rule));
         }
     }
 }

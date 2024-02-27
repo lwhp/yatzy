@@ -9,12 +9,12 @@ namespace Yatzy
 
     public class Die
     {
-        Random rand = new Random();
+        readonly Random rand = new();
 
         // Generate random amounts of roles
         public List<sbyte> GetRandomRolls(int amount)
         {
-            List<sbyte> rolls = new List<sbyte>();
+            List<sbyte> rolls = [];
 
             for (int i = 0; i < amount; i++)
             {
@@ -24,7 +24,7 @@ namespace Yatzy
             return rolls;
         }
 
-        private int[] GetRerollRoles(string rerolls)
+        private static int[] GetRerollRoles(string rerolls)
         {
             // Fjern alt whitespace fra bruger input 1, 2, 3, 4 -> 1,2,3,4
             string removeSpace = rerolls.Replace(" ", "");
@@ -47,7 +47,9 @@ namespace Yatzy
         {
             Console.Write("Skriv terning tallene du gerne vil reroll f.eks. (1, 3, 5) ");
 
+            #pragma warning disable CS8604 // Possible null reference argument.
             int[] rerollArray = GetRerollRoles(Console.ReadLine());
+            #pragma warning restore CS8604 // Possible null reference argument.
 
             foreach (int i in rerollArray)
             {
@@ -55,9 +57,10 @@ namespace Yatzy
                 Console.WriteLine($"Reroller terning {i}");
                 dice[index] = GetRandomRolls(1)[0];
 
-                Thread.Sleep(750);
+                Thread.Sleep(500);
 
                 Console.WriteLine($"Du slog en {dice[index]}");
+                Thread.Sleep(500);
             }
         }
     }

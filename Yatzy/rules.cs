@@ -9,7 +9,7 @@ namespace Yatzy
 {
     public static class Rules
     {
-        public static readonly Dictionary<string, sbyte[]> simpleRules = new Dictionary<string, sbyte[]>()
+        public static readonly Dictionary<string, sbyte[]> simpleRules = new()
         {
             { "enere", [1, 1, 1, 1, 1] },
             { "toere", [2, 2, 2, 2, 2] },
@@ -52,14 +52,14 @@ namespace Yatzy
             sbyte score = 0;
 
             // her lavet vi en dictionairy, dette differentiere sig fra et "array" or en "list" da man kan sætter index til at være et unikt key, istedet for at være 0-1-2-3-4 osv.
-            Dictionary<sbyte, sbyte> counts = new Dictionary<sbyte, sbyte>();
+            Dictionary<sbyte, sbyte> counts = [];
 
             foreach (sbyte die in dice)
             {
-                if (counts.ContainsKey(die))
-                    counts[die]++;
-                else
+                if (!counts.TryGetValue(die, out sbyte value))
                     counts[die] = 1;
+                else
+                    counts[die] = value++;
 
                 score += die;
             }

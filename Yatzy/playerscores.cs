@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using static System.Formats.Asn1.AsnWriter;
 
 namespace Yatzy
 {
     public class PlayerScores
     {
-        public Dictionary<string, int> Scores;
+        private Dictionary<string, int> Scores;
 
         public int currentTurn;
         public string name;
@@ -21,16 +16,59 @@ namespace Yatzy
             return Scores[rule] != -1;
         }
 
+        public int GetPlayerScore(string rule)
+        {
+            return Scores[rule];
+        }
+
+        public int GetPlayerTotalScore()
+        {
+            int score = 0;
+
+            foreach (KeyValuePair<string, int> pair in Scores)
+            {
+                score += pair.Value;
+            }
+
+            return score;
+        }
+
+        private void ApplyBonus()
+        {
+            int score = 0;
+
+            foreach (KeyValuePair<string, int> pair in Scores)
+            {
+                string rule = pair.Key;
+
+                if (rule == "enere" || rule == "toere" || rule == "trere" || rule == "fiere" || rule == "femere" || rule == "seksere")
+                    score += pair.Value;
+            }
+
+            if (score > 63)
+                Scores["bonus"] = 50;
+
+
+            if (score > 93)
+                Scores["extrabonus"] = 100;
+
+        }
+
         public void SetPlayerScore(string rule, int score)
         {
             Scores[rule] = score;
+
+            if (rule == "enere" || rule == "toere" || rule == "trere" || rule == "fiere" || rule == "femere" || rule == "seksere")
+            {
+                ApplyBonus();
+            }
         }
 
         public bool CanPlayNextRound()
         {
             foreach (KeyValuePair<string, int> pair in Scores)
             {
-                if (pair.Value > -1)
+                if (pair.Value == -1)
                     return true;
             }
 
@@ -50,7 +88,8 @@ namespace Yatzy
                 {"trere", -1},
                 {"toere", -1},
                 {"enere", -1},
-                {"bonus", -1 },
+                {"bonus", -1},
+                {"extrabonus", -1},
                 {"paret", -1},
                 {"parto", -1 },
                 {"treens", -1 },

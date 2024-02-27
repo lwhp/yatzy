@@ -6,6 +6,7 @@ using System.Data;
 
 namespace Yatzy
 {
+    #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
     internal class Program
     {
         static void ShowRolls(List<sbyte> rolls)
@@ -38,10 +39,32 @@ namespace Yatzy
             return answer == "ja";
         }
 
+        static void ChooseStarterPlayers()
+        {
+            Console.Write("Hvor mange spillere? (1-3): ");
+
+            int value = int.Parse(Console.ReadLine());
+
+            for (int i = 0; i < value; i++)
+            {
+                Console.Write("Indtast spiller " + (i+1) + " navn: ");
+                Scoreboard.AddPlayer(Console.ReadLine());
+            }
+
+            Console.WriteLine("Spillet starter om 3");
+            Thread.Sleep(1000);
+            Console.WriteLine("2");
+            Thread.Sleep(1000);
+            Console.WriteLine("1");
+            Thread.Sleep(1000);
+            Console.Clear();
+        }
+
         static void Main()
         {
-            Die dice = new Die();
-            Scoreboard.AddPlayer("Laurids");
+            ChooseStarterPlayers();
+
+            Die dice = new();
 
             // Et for loop for hver runde der afsluttes efter 15 runder
             string currentPlayer = Scoreboard.GetRandomStartPlayer();
@@ -64,7 +87,7 @@ namespace Yatzy
                     else
                         break;
 
-                    Thread.Sleep(1500);
+                    Thread.Sleep(1000);
                     Console.Clear();
                 }
 
@@ -83,18 +106,17 @@ namespace Yatzy
                 currentPlayer = Scoreboard.GetNextPlayerName(currentPlayer);
             }
 
-            string winner = Scoreboard.GetWinner();
-
-            Console.WriteLine("The game has concluded, and the winner is " + winner + "!");
-
-
-
+            Console.WriteLine("The game has concluded, and the winner is " + Scoreboard.GetWinner() + "!");
             Console.WriteLine("press enter to exit the program or type 'restart' to start a new game!");
 
             Scoreboard.PrintScoreboard();
+            Console.SetCursorPosition(0, 3);
 
             if (Console.ReadLine() == "restart")
+            {
+                Console.Clear();
                 Main();
+            }
         }
     }
 }
