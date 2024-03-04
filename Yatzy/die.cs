@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace Yatzy
+﻿namespace Yatzy
 {
 
     public class Die
@@ -29,20 +27,18 @@ namespace Yatzy
             string[] stringArray = removeSpace.Split(",");
 
             // her laver vi et tomt array der ser sådan her ud []
-            List<int> roles = new List<int>();
+            int[] rolls = [];
 
             for (int i = 0; i < stringArray.Length; i++)
             {
 
                 if (int.TryParse(stringArray[i], out int value) && value < 6 && value > 0)
                 {
-                    roles.Add(value);
+                    rolls[i] = value;
                 }
             }
 
-
-
-            return roles.ToArray();
+            return rolls;
         }
 
         public void StartRerolls(List<sbyte> dice)
