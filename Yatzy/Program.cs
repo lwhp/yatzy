@@ -2,50 +2,48 @@
 {
     internal class Program
     {
+        // A method to show the current dice rolls
         static void ShowRolls(List<sbyte> rolls)
         {
-            for (int i = 0; i < rolls.Count; i++)
-            {
-                if (i + 1 == rolls.Count)
-                    Console.Write(rolls[i] + "\n");
-                else
-                    Console.Write(rolls[i] + ", ");
-            }
+            string text = string.Join(", ", rolls);
+
+            Console.WriteLine(text.TrimEnd(','));
         }
 
-
+        // A method which returns true/false depending if the player wishes to reroll the current dice
         static bool ShouldReroll(List<sbyte> cubeRolls)
         {
-            Console.Write("Du smed med terningerne og fik: ");
+            Console.Write("You rolled: ");
             ShowRolls(cubeRolls);
-            Console.WriteLine("Ønkser du at reroll nogle terninger?");
-            Console.Write("Skriv ja/nej: ");
+            Console.WriteLine("Do you wish to reroll?");
+            Console.Write("Yes/No: ");
 
-            string answer = Console.ReadLine() ?? "";
+            string answer = (Console.ReadLine() ?? "").ToLower();
 
-            if (answer != "ja" && answer != "nej")
+            if (answer != "yes" && answer != "no")
             {
                 Console.Clear();
                 return ShouldReroll(cubeRolls);
             }
 
-            return answer == "ja";
+            return answer == "yes";
         }
 
-        static void ChooseStarterPlayers()
+        // A method which is run once per game to determain the amount of players
+        static void SelectPlayerCount()
         {
-            Console.Write("Hvor mange spillere? (1-3): ");
+            Console.Write("How many players? (1-3): ");
 
             if (int.TryParse(Console.ReadLine(), out int value) && value > 0 && value < 4)
             {
                 Console.Clear();
                 for (int i = 0; i < value; i++)
                 {
-                    Console.Write("Indtast spiller " + (i + 1) + " navn: ");
+                    Console.Write("Player " + (i + 1) + "'s name: ");
                     Scoreboard.AddPlayer(Console.ReadLine() ?? "");
                 }
 
-                Console.WriteLine("Spillet starter om 3");
+                Console.WriteLine("The game starts in 3");
                 Thread.Sleep(1000);
                 Console.WriteLine("2");
                 Thread.Sleep(1000);
@@ -54,37 +52,41 @@
                 Console.Clear();
             } else
             {
-                Console.WriteLine("FEJL! Prøv igen");
-                ChooseStarterPlayers();
+                Console.WriteLine("ERROR! Try again");
+                SelectPlayerCount();
             }
         }
 
         static void Main()
         {
-            ChooseStarterPlayers();
+            SelectPlayerCount();
 
-            Die dice = new();
-
-            // Et for loop for hver runde der afsluttes efter 15 runder
+            // A variable which reflects our current player
             string currentPlayer = Scoreboard.GetRandomStartPlayer();
+
+            // Our while loop continously run untill we no longer can find a player that needs missing scores
             while (currentPlayer != "")
             {
                 Scoreboard.PrintScoreboard();
 
-                Console.WriteLine($"{currentPlayer} slår med terningerne");
-                Console.WriteLine("Tryk enter for at slå med terningerne");
+                Console.WriteLine($"{currentPlayer} rolls the dice");
+                Console.WriteLine("Press ENTER to roll the dice");
                 Console.ReadLine();
 
                 Console.Clear();
 
-                List<sbyte> cubeRolls = dice.GetRandomRolls(5);
+                List<sbyte> cubeRolls = Die.GetRandomRolls(5);
 
                 for (int tur = 0; tur < 2; tur++)
                 {
                     if (ShouldReroll(cubeRolls))
-                        dice.StartRerolls(cubeRolls);
+                    {
+                        Die.StartRerolls(cubeRolls);
+                    }
                     else
+                    {
                         break;
+                    }
 
                     Thread.Sleep(1000);
                     Console.Clear();
@@ -92,7 +94,7 @@
 
                 Console.Clear();
 
-                Console.Write("Dine terninger: ");
+                Console.Write("Your rolls: ");
 
                 ShowRolls(cubeRolls);
 

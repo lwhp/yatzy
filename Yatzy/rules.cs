@@ -1,7 +1,14 @@
 ﻿namespace Yatzy
 {
+   /*
+    * Rule static class, here we hold all of our logic of giving points per rule
+    * The reason this class is static is because we don't want to make instances but just use the methods
+    */
+
     public static class Rules
     {
+        // A dictionairy which holds all of our "simpleRules" simply rules are defined by needing specific to give points.
+        // If the length of the ruleset is 6 that means its a strict rule and only give the points if they have all the dice
         public static readonly Dictionary<string, sbyte[]> simpleRules = new()
         {
             { "enere", [1, 1, 1, 1, 1] },
@@ -12,9 +19,9 @@
             { "seksere", [6, 6, 6, 6, 6] },
             { "lilstraight", [1, 2, 3, 4, 5, 15] },
             { "bigstraight", [2, 3, 4, 5, 6, 20] },
-            { "house", [2, 2, 5, 5, 5, 50] },
         };
 
+        // Get the sum of our simple ruleset and return points
         public static int GetSumOfSimple(List<sbyte> dice, string rule)
         {
             sbyte[] currentRules = simpleRules[rule];
@@ -33,37 +40,58 @@
                     dice.Remove(die);
                 }
                 else if (isStrict)
+                {
                     return 0;
+                }
             }
 
             return points;
         }
 
-
-        public static int GetSumOfAdvanced(List<sbyte> dice, sbyte numberOfKind, bool isYahtzy)
+        // Get sum of our dice and return amount (used for the chance ruleset)
+        public static sbyte GetSumOfDice(List<sbyte> dice)
         {
             sbyte score = 0;
 
-            // her lavet vi en dictionairy, dette differentiere sig fra et "array" or en "list" da man kan sætter index til at være et unikt key, istedet for at være 0-1-2-3-4 osv.
+            foreach (sbyte die in dice)
+            {
+                score += die;
+            }
+
+            return score;
+        }
+
+        // Return the points of the advanced ruleset (used for numberofkind, pairs and yahtzy)
+        public static int GetSumOfAdvanced(List<sbyte> dice, sbyte numberOfKind, bool isYahtzy)
+        {
+            // Key is the die face and value is the amount of dice with that die face
             Dictionary<sbyte, sbyte> counts = [];
 
             foreach (sbyte die in dice)
             {
-                if (!counts.TryGetValue(die, out sbyte value))
+                if (!counts.ContainsKey(die))
                     counts[die] = 1;
                 else
-                    counts[die] = value++;
-
-                score += die;
+                    counts[die]++;
             }
 
-            foreach (sbyte amountOfKind in counts.Values)
+            int score = 0;
+
+            foreach (KeyValuePair<sbyte, sbyte> pair in counts)
             {
-                if (amountOfKind >= numberOfKind)
-                    return isYahtzy ? 50 : score;
+                int newScore = numberOfKind * pair.Key;
+                if (pair.Value >= numberOfKind && newScore > score)
+                {
+                    score = newScore;
+
+                    if (isYahtzy)
+                    {
+                        return 50;
+                    }
+                }
             }
 
-            return 0;
+            return score;
         }
     }
 }

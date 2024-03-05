@@ -2,17 +2,23 @@
 {
     public static class Scoreboard
     {
-
+        // Private Dictionary with all of our players and their objects, each player is stored by their name as the key
         private static Dictionary<string, PlayerScores> Players = [];
 
+        // Private variable that stores the max players in the current game
+        private static sbyte maxPlayers = 0;
+
+        // Method to add a player object
         public static void AddPlayer(string playerName)
         {
-            Players[playerName] = new PlayerScores(playerName);
+            maxPlayers++;
+            Players[playerName] = new PlayerScores(playerName, maxPlayers);
         }
 
+        // A method whcih returns the next players name
         public static string GetNextPlayerName(string currentPlayer) {
             int currentTurn = Players[currentPlayer].currentTurn;
-            int nextTurn = currentTurn == PlayerScores.playerCount ? 1 : currentTurn + 1;
+            int nextTurn = currentTurn == maxPlayers ? 1 : currentTurn + 1;
 
             foreach (KeyValuePair<string, PlayerScores> player in Players)
             {
@@ -20,10 +26,11 @@
                     return player.Value.name;
             }
 
-            // This is our fallback return, if no players can play (the entire game has concluded) then we return this
+            // This is our fallback return, if no players can play (the entire game has concluded) then we return empty a string
             return "";
         }
 
+        // A method which determains a random starting player
         public static string GetRandomStartPlayer()
         {
             List<string> list = [];
@@ -38,7 +45,7 @@
             return list[random.Next(0, list.Count)];
         }
 
-
+        // A method whcih adds the players points (returns true if points were successfully added or false if its already been set)
         public static bool AddPlayerPoints(string playerName, List<sbyte> rolls, string rule)
         {
             PlayerScores player = Players[playerName];
@@ -51,34 +58,39 @@
 
             if (Rules.simpleRules.ContainsKey(rule))
                 player.SetPlayerScore(rule, Rules.GetSumOfSimple(rolls, rule));
+            else if (rule == "chance")
+                player.SetPlayerScore(rule, Rules.GetSumOfDice(rolls));
             else
                 player.SetPlayerScore(rule, Rules.GetSumOfAdvanced(rolls, GetRuleSum(rule), rule == "yatzy"));
 
             return true;
         }
 
+        // A static dictionary which is used to translate Key values to readable strings for our users
         private readonly static Dictionary<string, string> ValueToString = new()
         {
-            {"seksere", "6'ere"},
-            {"femere", "5'ere"},
-            {"fiere", "4'ere"},
-            {"trere", "3'ere"},
-            {"toere", "2'ere"},
-            {"enere", "1'ere"},
+            {"seksere", "Sixes"},
+            {"femere", "Fives"},
+            {"fiere", "Fours"},
+            {"trere", "Threes"},
+            {"toere", "Twos"},
+            {"enere", "Aces"},
             {"bonus", "Bonus" },
             {"extrabonus", "Extra Bonus" },
-            {"paret", "Et Par" },
-            {"parto", "To Par" },
-            {"treens", "Tre Ens" },
-            {"fiereens", "Fire Ens" },
+            {"paret", "One Pair" },
+            {"parto", "Two Pairs" },
+            {"treens", "3 of Kind" },
+            {"fiereens", "4 of Kind" },
             {"lilstraight", "Little Straight" },
             {"bigstraight", "Big Straight" },
-            {"house", "House" },
             {"chance", "Chance" },
             {"yatzy", "YATZY!" }
         };
 
-        private readonly static List<string> LoadOrder = ["enere", "toere", "trere", "fiere", "femere", "seksere", "bonus", "extrabonus", "paret", "parto", "treens", "fiereens", "lilstraight", "bigstraight", "house", "chance", "yatzy"];
+        // A private list which is here to determain loadorder and which values to show first
+        private readonly static List<string> LoadOrder = ["enere", "toere", "trere", "fiere", "femere", "seksere", "bonus", "extrabonus", "paret", "parto", "treens", "fiereens", "lilstraight", "bigstraight", "chance", "yatzy"];
+       
+        // A method used to write out our entire player scoreboard
         public static void PrintScoreboard()
         {
             int playerIndex = 0;
@@ -103,7 +115,6 @@
 
                 // Save our total score as an variable
                 int totalScore = 0;
-
 
                 /* 
                  * Here we write out the points and rules of each player.
@@ -139,6 +150,7 @@
         }
 
 
+        // A method to determain the winner of the the game
         public static string GetWinner()
         {
             string currentPlayer = "";
@@ -157,23 +169,24 @@
             return currentPlayer;
         }
 
-        public static sbyte GetZeroToSixteen()
+        // A private method to get a valid index number for our ruleset
+        private static sbyte GetValidNumber(sbyte maxRoll)
         {
-
             if (sbyte.TryParse(Console.ReadLine() ?? "", out sbyte i))
             {
-                if (i >= 0 && i <= 16)
+                if (i >= 0 && i <= maxRoll)
                 {
                     return i;
                 }
             }
 
-            return GetZeroToSixteen();
+            return GetValidNumber(maxRoll);
         }
 
-
-        public static sbyte GetRuleSum(string rule)
+        // A method which returns the number of kinds for our ruleset (used for our advanced rules)
+        private static sbyte GetRuleSum(string rule)
         {
+            // We use a "Switch Expression" here for the sake of readability as doing a traditional switch would get harder to read
             return rule switch
             {
                 "paret" => 2,
@@ -184,15 +197,17 @@
                 _ => 0,
             };
         }
+
+        // A method which write out the specified players scoreboard, this one also differs as it shows which fields the player can input into
         public static void PrintPlayerScoreboard(string currentPlayer, List<sbyte> rolls)
         {
             PlayerScores player = Players[currentPlayer];
 
-
             int yShift = 10;
 
             Console.SetCursorPosition(0, yShift);
-            Console.WriteLine($"{"", -31} Points");
+
+            Console.WriteLine($"{"Number", -10} {"Rule",-15} Points");
 
             for (int i = 0; i < LoadOrder.Count; i++)
             {
@@ -210,11 +225,12 @@
             Console.SetCursorPosition(0, 1);
 
             string rule;
+            sbyte maxRoll = (sbyte)(LoadOrder.Count - 1);
             do 
             {
-                Console.WriteLine($"Hvor vil du krydse af? (0 - {LoadOrder.Count - 1})");
+                Console.WriteLine($"Where do you want to score? (0 - {maxRoll})");
 
-                sbyte value = GetZeroToSixteen();
+                sbyte value = GetValidNumber(maxRoll);
 
                 rule = LoadOrder[value];
             }
