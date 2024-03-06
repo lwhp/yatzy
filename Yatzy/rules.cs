@@ -48,21 +48,11 @@
             return points;
         }
 
-        // Get sum of our dice and return amount (used for the chance ruleset)
-        public static sbyte GetSumOfDice(List<sbyte> dice)
-        {
-            sbyte score = 0;
-
-            foreach (sbyte die in dice)
-            {
-                score += die;
-            }
-
-            return score;
-        }
+        // Using lambda expression we can get the sum of the dice, by looping over it
+        public static sbyte GetSumOfDice(List<sbyte> dice) => (sbyte)dice.Sum(x => x);
 
         // Return the points of the advanced ruleset (used for numberofkind, pairs and yahtzy)
-        public static int GetSumOfAdvanced(List<sbyte> dice, sbyte numberOfKind, bool isYahtzy)
+        public static int GetSumOfAdvanced(List<sbyte> dice, sbyte requireDicecount, bool isYahtzy)
         {
             // Key is the die face and value is the amount of dice with that die face
             Dictionary<sbyte, sbyte> counts = [];
@@ -79,15 +69,10 @@
 
             foreach (KeyValuePair<sbyte, sbyte> pair in counts)
             {
-                int newScore = numberOfKind * pair.Key;
-                if (pair.Value >= numberOfKind && newScore > score)
+                int newScore = requireDicecount * pair.Key;
+                if (pair.Value >= requireDicecount && newScore > score)
                 {
-                    score = newScore;
-
-                    if (isYahtzy)
-                    {
-                        return 50;
-                    }
+                    score = isYahtzy ? 50 : newScore;
                 }
             }
 

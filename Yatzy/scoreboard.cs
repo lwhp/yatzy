@@ -184,19 +184,15 @@
         }
 
         // A method which returns the number of kinds for our ruleset (used for our advanced rules)
-        private static sbyte GetRuleSum(string rule)
+        private static sbyte GetRuleSum(string rule) => rule switch
         {
-            // We use a "Switch Expression" here for the sake of readability as doing a traditional switch would get harder to read
-            return rule switch
-            {
-                "paret" => 2,
-                "parto" => 4,
-                "treens" => 3,
-                "fiereens" => 4,
-                "yatzy" => 5,
-                _ => 0,
-            };
-        }
+            "paret" => 2,
+            "parto" => 4,
+            "treens" => 3,
+            "fiereens" => 4,
+            "yatzy" => 5,
+            _ => 0,
+        };
 
         // A method which write out the specified players scoreboard, this one also differs as it shows which fields the player can input into
         public static void PrintPlayerScoreboard(string currentPlayer, List<sbyte> rolls)
